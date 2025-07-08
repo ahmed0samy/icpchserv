@@ -30,12 +30,13 @@ async function startServer() {
   io.on("connection", (socket) => {
     const id = socket.id;
 
-    
     socket.on("admin-init", async () => {
       const entries = await client.hGetAll("activeUsers");
       for (const [id, signalStr] of Object.entries(entries)) {
         const signal = JSON.parse(signalStr);
         socket.emit("incoming-stream", { id, signal });
+        // Notify the user to resend their signal
+        io.to(id).emit("resend-signal");
       }
     });
 
